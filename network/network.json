@@ -1,0 +1,122 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "name": "Hub Abidjan",
+      "type": "hub",
+      "coordinates": [5.359952, -4.008256],
+      "capacity": 1000
+    },
+    {
+      "id": 1,
+      "name": "Relais Yamoussoukro",
+      "type": "relay",
+      "coordinates": [6.827623, -5.289343],
+      "capacity": 500
+    },
+    {
+      "id": 2,
+      "name": "Station Bouaké",
+      "type": "station",
+      "coordinates": [7.69, -5.03],
+      "capacity": 300
+    },
+    {
+      "id": 3,
+      "name": "Hub San-Pédro",
+      "type": "hub",
+      "coordinates": [4.7456, -6.6613],
+      "capacity": 800
+    },
+    {
+      "id": 4,
+      "name": "Relais Daloa",
+      "type": "relay",
+      "coordinates": [6.8774, -6.4478],
+      "capacity": 400
+    },
+    {
+      "id": 5,
+      "name": "Station Korhogo",
+      "type": "station",
+      "coordinates": [9.4491, -5.6425],
+      "capacity": 250
+    },
+    {
+      "id": 6,
+      "name": "Relais Man",
+      "type": "relay",
+      "coordinates": [7.4125, -7.5538],
+      "capacity": 350
+    },
+    {
+      "id": 7,
+      "name": "Station Gagnoa",
+      "type": "station",
+      "coordinates": [6.1375, -5.9086],
+      "capacity": 200
+    }
+  ],
+  "edges": [
+    {
+      "source": 0,
+      "destination": 1,
+      "distance": 248.5,
+      "baseTime": 180,
+      "cost": 25000,
+      "roadType": 0,
+      "reliability": 0.95,
+      "restrictions": 3,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.5,
+        "night": 0.9
+      }
+    },
+    {
+      "source": 1,
+      "destination": 2,
+      "distance": 135.2,
+      "baseTime": 110,
+      "cost": 18000,
+      "roadType": 1,
+      "reliability": 0.85,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.3,
+        "afternoon": 1.1,
+        "night": 0.8
+      }
+    },
+    {
+      "source": 0,
+      "destination": 3,
+      "distance": 320.7,
+      "baseTime": 240,
+      "cost": 35000,
+      "roadType": 0,
+      "reliability": 0.92,
+      "restrictions": 1,
+      "timeVariation": {
+        "morning": 1.1,
+        "afternoon": 1.4,
+        "night": 0.7
+      }
+    },
+    {
+      "source": 3,
+      "destination": 4,
+      "distance": 185.4,
+      "baseTime": 150,
+      "cost": 22000,
+      "roadType": 1,
+      "reliability": 0.88,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.3,
+        "night": 0.9
+      }
+    }
+  ]
+}
