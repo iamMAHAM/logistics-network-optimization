@@ -4,6 +4,9 @@
 #include "algorithms/dfs.h"
 #include "algorithms/bfs.h"
 #include "algorithms/graph_analysis.h"
+#include "algorithms/floyd_warshall.h"
+#include "algorithms/bellman_ford.h"
+#include <float.h>
 
 int main()
 {
@@ -62,6 +65,64 @@ int main()
     // Test du calcul des statistiques de connectivité
     printf("\nTest du calcul des statistiques de connectivité :\n");
     calculateConnectivityStats(graph);
+
+    // Test de l'algorithme de Floyd-Warshall
+    printf("\nTest de l'algorithme de Floyd-Warshall :\n");
+    double **graphMatrix = (double **)malloc(graph->V * sizeof(double *));
+    for (int i = 0; i < graph->V; i++)
+    {
+        graphMatrix[i] = (double *)malloc(graph->V * sizeof(double));
+        for (int j = 0; j < graph->V; j++)
+        {
+            if (i == j)
+            {
+                graphMatrix[i][j] = 0;
+            }
+            else
+            {
+                graphMatrix[i][j] = DBL_MAX;
+            }
+        }
+    }
+
+    for (int v = 0; v < graph->V; v++)
+    {
+        AdjListNode *current = graph->array[v].head;
+        while (current)
+        {
+            graphMatrix[v][current->dest] = current->attr.distance;
+            current = current->next;
+        }
+    }
+
+    floydWarshall(graphMatrix, graph->V);
+
+    for (int i = 0; i < graph->V; i++)
+    {
+        free(graphMatrix[i]);
+    }
+    free(graphMatrix);
+
+    // Test de l'algorithme de Bellman-Ford
+    printf("\nTest de l'algorithme de Bellman-Ford :\n");
+    double *dist = (double *)malloc(graph->V * sizeof(double));
+    int *predecessor = (int *)malloc(graph->V * sizeof(int));
+
+    if (bellmanFord(graph, 0, dist, predecessor))
+    {
+        printf("Distances depuis le sommet 0 :\n");
+        for (int i = 0; i < graph->V; i++)
+        {
+            printf("Sommet %d : %.2f\n", i, dist[i]);
+        }
+    }
+    else
+    {
+        printf("Un cycle de poids négatif a été détecté dans le graphe.\n");
+    }
+
+    free(dist);
+    free(predecessor);
 
     // Sauvegarder le graphe dans un autre fichier JSON
     const char *output_filename = "output_network.json";
