@@ -8,8 +8,146 @@
 #include "algorithms/bellman_ford.h"
 #include "algorithms/tsp.h"
 #include "algorithms/multi_day_planning.h"
+#include "algorithms/greedy_algorithms.h"
+#include "algorithms/genetic_algorithm.h"
 #include <float.h>
 #include <limits.h>
+#include <time.h>
+
+// Fonction de test pour démontrer l'algorithme génétique
+void testGeneticAlgorithm(Graph *graph)
+{
+    printf("\n=== Test de l'algorithme génétique ===\n");
+
+    // Initialiser le générateur de nombres aléatoires avec l'heure actuelle
+    srand(time(NULL));
+
+    // Créer des véhicules et des colis
+    int vehicleCount = 5;
+    int packageCount = 20;
+    int maxWeight = 50;
+    int defaultCapacity = 150;
+
+    Vehicle *vehicles = createVehicles(vehicleCount, defaultCapacity);
+    Package *packages = createPackages(packageCount, maxWeight, graph->V);
+
+    printf("Initialisation de %d véhicules et %d colis\n", vehicleCount, packageCount);
+
+    // Afficher les détails des véhicules et des colis
+    printf("\nDétails des véhicules:\n");
+    for (int i = 0; i < vehicleCount; i++)
+    {
+        printf("Véhicule %d: capacité=%d, location=%d\n",
+               vehicles[i].id, vehicles[i].capacity, vehicles[i].location);
+    }
+
+    printf("\nDétails des colis:\n");
+    for (int i = 0; i < packageCount; i++)
+    {
+        printf("Colis %d: source=%d, dest=%d, poids=%d, priorité=%d\n",
+               packages[i].id, packages[i].source, packages[i].destination,
+               packages[i].weight, packages[i].priority);
+    }
+
+    // Assigner des colis aux véhicules
+    printf("\nAssignation des colis aux véhicules:\n");
+    int allAssigned = greedyPackageAssignment(packages, packageCount, vehicles, vehicleCount);
+    printf("Tous les colis ont été affectés: %s\n", allAssigned ? "Oui" : "Non");
+
+    // Afficher le statut des véhicules après l'affectation
+    printAllVehicleStatus(vehicles, vehicleCount);
+
+    // Configurer l'algorithme génétique
+    GAConfig config = initGAConfig(
+        50,   // populationSize
+        100,  // maxGenerations
+        0.8,  // crossoverRate
+        0.2,  // mutationRate
+        5,    // eliteCount
+        5,    // tournamentSize
+        true, // adaptiveParams
+        20    // stagnationLimit
+    );
+
+    printf("\nConfiguration de l'algorithme génétique:\n");
+    printf("Taille de population: %d\n", config.populationSize);
+    printf("Générations max: %d\n", config.maxGenerations);
+    printf("Taux de croisement: %.2f\n", config.crossoverRate);
+    printf("Taux de mutation: %.2f\n", config.mutationRate);
+
+    // Exécuter l'algorithme génétique
+    printf("\nExécution de l'algorithme génétique...\n");
+    Chromosome bestSolution = runGeneticAlgorithm(graph, vehicles, vehicleCount, packages, packageCount, config);
+
+    // Afficher les résultats
+    printf("\nMeilleure solution trouvée:\n");
+    printChromosome(&bestSolution);
+
+    // Afficher des statistiques supplémentaires
+    printf("\nStatistiques de la solution:\n");
+    printf("Distance totale: %.2f\n", bestSolution.totalDistance);
+    printf("Temps total: %.2f\n", bestSolution.totalTime);
+    printf("Coût total: %.2f\n", bestSolution.totalCost);
+    printf("Colis non livrés: %d\n", bestSolution.unservedPackages);
+    printf("Solution valide: %s\n", bestSolution.isValid ? "Oui" : "Non");
+
+    // Libérer la mémoire
+    freeVehicles(vehicles, vehicleCount);
+    freePackages(packages, packageCount);
+    freeChromosome(&bestSolution);
+
+    printf("=== Fin du test de l'algorithme génétique ===\n");
+}
+
+// Fonction de test pour démontrer l'approche gloutonne
+void testGreedyAlgorithms(Graph *graph)
+{
+    printf("\n=== Test des algorithmes gloutons ===\n");
+
+    // Initialiser le générateur de nombres aléatoires
+    srand(time(NULL));
+
+    // Créer des véhicules et des colis
+    int vehicleCount = 3;
+    int packageCount = 10;
+    int maxWeight = 50;
+    int defaultCapacity = 150;
+
+    Vehicle *vehicles = createVehicles(vehicleCount, defaultCapacity);
+    Package *packages = createPackages(packageCount, maxWeight, graph->V);
+
+    printf("Initialisation de %d véhicules et %d colis\n", vehicleCount, packageCount);
+
+    // 1. Affectation des colis aux véhicules
+    printf("\n1. Affectation des colis aux véhicules\n");
+    int allAssigned = greedyPackageAssignment(packages, packageCount, vehicles, vehicleCount);
+    printf("Tous les colis ont été affectés: %s\n", allAssigned ? "Oui" : "Non");
+
+    // Afficher le statut des véhicules après l'affectation
+    printAllVehicleStatus(vehicles, vehicleCount);
+
+    // 2. Planification des tournées
+    printf("\n2. Planification des tournées\n");
+    greedyRouteScheduling(graph, vehicles, vehicleCount);
+
+    // Afficher le statut des véhicules après la planification
+    printAllVehicleStatus(vehicles, vehicleCount);
+
+    // 3. Simulation d'un imprévu: panne d'un véhicule
+    printf("\n3. Simulation d'un imprévu: panne du véhicule %d\n", vehicles[0].id);
+    int reallocSuccess = greedyDynamicReallocation(graph, vehicles, vehicleCount, vehicles[0].id, packages, packageCount);
+
+    printf("Redistribution des colis: %s\n", reallocSuccess ? "Réussie" : "Échouée");
+
+    // Afficher le statut final des véhicules
+    printAllVehicleStatus(vehicles, vehicleCount);
+
+    // Libérer la mémoire
+    freeVehicles(vehicles, vehicleCount);
+    freePackages(packages, packageCount);
+
+    printf("=== Fin du test des algorithmes gloutons ===\n");
+}
 
 int main()
 {
@@ -237,6 +375,12 @@ int main()
         free(costMatrix[i]);
     }
     free(costMatrix);
+
+    // Test des algorithmes gloutons
+    testGreedyAlgorithms(graph);
+
+    // Test de l'algorithme génétique
+    testGeneticAlgorithm(graph);
 
     // Sauvegarder le graphe dans un autre fichier JSON
     const char *output_filename = "output_network.json";
