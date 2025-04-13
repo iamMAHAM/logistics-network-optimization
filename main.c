@@ -6,12 +6,15 @@
 #include "algorithms/graph_analysis.h"
 #include "algorithms/floyd_warshall.h"
 #include "algorithms/bellman_ford.h"
+#include "algorithms/tsp.h"
+#include "algorithms/multi_day_planning.h"
 #include <float.h>
+#include <limits.h>
 
 int main()
 {
     // Exemple de fichier JSON attendu pour décrire le réseau
-    const char *json_filename = "network/network_tree.json";
+    const char *json_filename = "network/good_voyager.json";
 
     // Charger le graphe à partir du fichier JSON
     Graph *graph = loadGraphFromJSON(json_filename);
@@ -123,6 +126,117 @@ int main()
 
     free(dist);
     free(predecessor);
+
+    // Test du problème du voyageur de commerce (TSP)
+    printf("\nTest du problème du voyageur de commerce (TSP) :\n");
+    int **tspGraph = (int **)malloc(graph->V * sizeof(int *));
+    for (int i = 0; i < graph->V; i++)
+    {
+        tspGraph[i] = (int *)malloc(graph->V * sizeof(int));
+        for (int j = 0; j < graph->V; j++)
+        {
+            if (i == j)
+            {
+                tspGraph[i][j] = 0;
+            }
+            else
+            {
+                tspGraph[i][j] = INT_MAX;
+            }
+        }
+    }
+
+    for (int v = 0; v < graph->V; v++)
+    {
+        AdjListNode *current = graph->array[v].head;
+        while (current)
+        {
+            tspGraph[v][current->dest] = (int)current->attr.cost;
+            current = current->next;
+        }
+    }
+
+    // Afficher la matrice TSP pour débogage
+    printf("\nMatrice TSP :\n");
+    for (int i = 0; i < graph->V; i++)
+    {
+        for (int j = 0; j < graph->V; j++)
+        {
+            if (tspGraph[i][j] == INT_MAX)
+            {
+                printf("INF ");
+            }
+            else
+            {
+                printf("%d ", tspGraph[i][j]);
+            }
+        }
+        printf("\n");
+    }
+
+    solveTSP(tspGraph, graph->V);
+
+    for (int i = 0; i < graph->V; i++)
+    {
+        free(tspGraph[i]);
+    }
+    free(tspGraph);
+
+    // Test de la planification multi-jours des livraisons
+    printf("\nTest de la planification multi-jours des livraisons :\n");
+    int days = 3; // Exemple : planification sur 3 jours
+    int **costMatrix = (int **)malloc(graph->V * sizeof(int *));
+    for (int i = 0; i < graph->V; i++)
+    {
+        costMatrix[i] = (int *)malloc(graph->V * sizeof(int));
+        for (int j = 0; j < graph->V; j++)
+        {
+            if (i == j)
+            {
+                costMatrix[i][j] = 0;
+            }
+            else
+            {
+                costMatrix[i][j] = INT_MAX;
+            }
+        }
+    }
+
+    for (int v = 0; v < graph->V; v++)
+    {
+        AdjListNode *current = graph->array[v].head;
+        while (current)
+        {
+            costMatrix[v][current->dest] = (int)current->attr.cost;
+            current = current->next;
+        }
+    }
+
+    // Afficher la matrice des coûts pour la planification multi-jours
+    printf("\nMatrice des coûts pour la planification multi-jours :\n");
+    for (int i = 0; i < graph->V; i++)
+    {
+        for (int j = 0; j < graph->V; j++)
+        {
+            if (costMatrix[i][j] == INT_MAX)
+            {
+                printf("INF ");
+            }
+            else
+            {
+                printf("%d ", costMatrix[i][j]);
+            }
+        }
+        printf("\n");
+    }
+
+    multiDayDeliveryPlanning(costMatrix, graph->V, days);
+
+    for (int i = 0; i < graph->V; i++)
+    {
+        free(costMatrix[i]);
+    }
+    free(costMatrix);
 
     // Sauvegarder le graphe dans un autre fichier JSON
     const char *output_filename = "output_network.json";

@@ -1,0 +1,341 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "name": "Node A",
+      "type": "hub",
+      "coordinates": [0.0, 0.0],
+      "capacity": 1000
+    },
+    {
+      "id": 1,
+      "name": "Node B",
+      "type": "relay",
+      "coordinates": [1.0, 1.0],
+      "capacity": 500
+    },
+    {
+      "id": 2,
+      "name": "Node C",
+      "type": "station",
+      "coordinates": [2.0, 2.0],
+      "capacity": 300
+    },
+    {
+      "id": 3,
+      "name": "Node D",
+      "type": "hub",
+      "coordinates": [3.0, 3.0],
+      "capacity": 800
+    },
+    {
+      "id": 4,
+      "name": "Node E",
+      "type": "relay",
+      "coordinates": [4.0, 4.0],
+      "capacity": 400
+    }
+  ],
+  "edges": [
+    {
+      "source": 0,
+      "destination": 1,
+      "distance": 10,
+      "baseTime": 5,
+      "cost": 2500,
+      "roadType": 1,
+      "reliability": 0.9,
+      "restrictions": 1,
+      "timeVariation": {
+        "morning": 1.1,
+        "afternoon": 1.2,
+        "night": 0.8
+      }
+    },
+    {
+      "source": 0,
+      "destination": 2,
+      "distance": 15,
+      "baseTime": 7,
+      "cost": 3000,
+      "roadType": 2,
+      "reliability": 0.85,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.3,
+        "night": 0.9
+      }
+    },
+    {
+      "source": 0,
+      "destination": 3,
+      "distance": 20,
+      "baseTime": 10,
+      "cost": 4000,
+      "roadType": 1,
+      "reliability": 0.8,
+      "restrictions": 1,
+      "timeVariation": {
+        "morning": 1.3,
+        "afternoon": 1.4,
+        "night": 0.7
+      }
+    },
+    {
+      "source": 0,
+      "destination": 4,
+      "distance": 25,
+      "baseTime": 12,
+      "cost": 5000,
+      "roadType": 3,
+      "reliability": 0.75,
+      "restrictions": 3,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.1,
+        "night": 0.8
+      }
+    },
+    {
+      "source": 1,
+      "destination": 0,
+      "distance": 10,
+      "baseTime": 5,
+      "cost": 2500,
+      "roadType": 1,
+      "reliability": 0.9,
+      "restrictions": 1,
+      "timeVariation": {
+        "morning": 1.1,
+        "afternoon": 1.2,
+        "night": 0.8
+      }
+    },
+    {
+      "source": 1,
+      "destination": 2,
+      "distance": 12,
+      "baseTime": 6,
+      "cost": 2800,
+      "roadType": 1,
+      "reliability": 0.9,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.1,
+        "night": 0.9
+      }
+    },
+    {
+      "source": 1,
+      "destination": 3,
+      "distance": 18,
+      "baseTime": 8,
+      "cost": 3500,
+      "roadType": 2,
+      "reliability": 0.85,
+      "restrictions": 1,
+      "timeVariation": {
+        "morning": 1.1,
+        "afternoon": 1.3,
+        "night": 0.8
+      }
+    },
+    {
+      "source": 1,
+      "destination": 4,
+      "distance": 22,
+      "baseTime": 11,
+      "cost": 4500,
+      "roadType": 1,
+      "reliability": 0.8,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.3,
+        "afternoon": 1.2,
+        "night": 0.7
+      }
+    },
+    {
+      "source": 2,
+      "destination": 0,
+      "distance": 15,
+      "baseTime": 7,
+      "cost": 3000,
+      "roadType": 2,
+      "reliability": 0.85,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.3,
+        "night": 0.9
+      }
+    },
+    {
+      "source": 2,
+      "destination": 1,
+      "distance": 12,
+      "baseTime": 6,
+      "cost": 2800,
+      "roadType": 1,
+      "reliability": 0.9,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.1,
+        "night": 0.9
+      }
+    },
+    {
+      "source": 2,
+      "destination": 3,
+      "distance": 14,
+      "baseTime": 7,
+      "cost": 3200,
+      "roadType": 3,
+      "reliability": 0.9,
+      "restrictions": 1,
+      "timeVariation": {
+        "morning": 1.1,
+        "afternoon": 1.2,
+        "night": 0.8
+      }
+    },
+    {
+      "source": 2,
+      "destination": 4,
+      "distance": 19,
+      "baseTime": 9,
+      "cost": 4000,
+      "roadType": 2,
+      "reliability": 0.85,
+      "restrictions": 3,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.3,
+        "night": 0.7
+      }
+    },
+    {
+      "source": 3,
+      "destination": 0,
+      "distance": 20,
+      "baseTime": 10,
+      "cost": 4000,
+      "roadType": 1,
+      "reliability": 0.8,
+      "restrictions": 1,
+      "timeVariation": {
+        "morning": 1.3,
+        "afternoon": 1.4,
+        "night": 0.7
+      }
+    },
+    {
+      "source": 3,
+      "destination": 1,
+      "distance": 18,
+      "baseTime": 8,
+      "cost": 3500,
+      "roadType": 2,
+      "reliability": 0.85,
+      "restrictions": 1,
+      "timeVariation": {
+        "morning": 1.1,
+        "afternoon": 1.3,
+        "night": 0.8
+      }
+    },
+    {
+      "source": 3,
+      "destination": 2,
+      "distance": 14,
+      "baseTime": 7,
+      "cost": 3200,
+      "roadType": 3,
+      "reliability": 0.9,
+      "restrictions": 1,
+      "timeVariation": {
+        "morning": 1.1,
+        "afternoon": 1.2,
+        "night": 0.8
+      }
+    },
+    {
+      "source": 3,
+      "destination": 4,
+      "distance": 16,
+      "baseTime": 8,
+      "cost": 3600,
+      "roadType": 1,
+      "reliability": 0.9,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.1,
+        "night": 0.9
+      }
+    },
+    {
+      "source": 4,
+      "destination": 0,
+      "distance": 25,
+      "baseTime": 12,
+      "cost": 5000,
+      "roadType": 3,
+      "reliability": 0.75,
+      "restrictions": 3,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.1,
+        "night": 0.8
+      }
+    },
+    {
+      "source": 4,
+      "destination": 1,
+      "distance": 22,
+      "baseTime": 11,
+      "cost": 4500,
+      "roadType": 1,
+      "reliability": 0.8,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.3,
+        "afternoon": 1.2,
+        "night": 0.7
+      }
+    },
+    {
+      "source": 4,
+      "destination": 2,
+      "distance": 19,
+      "baseTime": 9,
+      "cost": 4000,
+      "roadType": 2,
+      "reliability": 0.85,
+      "restrictions": 3,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.3,
+        "night": 0.7
+      }
+    },
+    {
+      "source": 4,
+      "destination": 3,
+      "distance": 16,
+      "baseTime": 8,
+      "cost": 3600,
+      "roadType": 1,
+      "reliability": 0.9,
+      "restrictions": 2,
+      "timeVariation": {
+        "morning": 1.2,
+        "afternoon": 1.1,
+        "night": 0.9
+      }
+    }
+  ]
+}
