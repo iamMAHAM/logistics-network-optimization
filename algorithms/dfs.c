@@ -22,13 +22,26 @@ bool isStackEmpty(Stack *stack)
 // Empile un élément
 void push(Stack *stack, int value)
 {
+    if (stack->top + 1 >= stack->capacity)
+    {
+        printf("Error: Stack overflow while pushing %d\n", value);
+        return;
+    }
     stack->data[++stack->top] = value;
+    printf("Pushed %d onto the stack.\n", value);
 }
 
 // Dépile un élément
 int pop(Stack *stack)
 {
-    return stack->data[stack->top--];
+    if (isStackEmpty(stack))
+    {
+        printf("Error: Stack underflow while popping.\n");
+        return -1; // Return an invalid value to indicate error
+    }
+    int value = stack->data[stack->top--];
+    printf("Popped %d from the stack.\n", value);
+    return value;
 }
 
 // Libère la mémoire de la pile
@@ -41,34 +54,41 @@ void freeStack(Stack *stack)
 // Fonction DFS
 void DFS(Graph *graph, int startVertex)
 {
-    bool *visited = (bool *)calloc(graph->V, sizeof(bool));
     Stack *stack = createStack(graph->V);
+    bool *visited = (bool *)malloc(graph->V * sizeof(bool));
+    for (int i = 0; i < graph->V; i++)
+    {
+        visited[i] = false;
+    }
 
     push(stack, startVertex);
+    printf("Starting DFS from vertex %d\n", startVertex);
 
-    printf("Parcours en profondeur (DFS) :\n");
     while (!isStackEmpty(stack))
     {
         int currentVertex = pop(stack);
+        printf("Popped vertex %d from stack\n", currentVertex);
 
         if (!visited[currentVertex])
         {
-            printf("%d ", currentVertex);
+            printf("Visiting vertex %d\n", currentVertex);
             visited[currentVertex] = true;
         }
 
         AdjListNode *adjList = graph->array[currentVertex].head;
-        while (adjList)
+        while (adjList != NULL)
         {
-            if (!visited[adjList->dest])
+            int adjVertex = adjList->dest;
+            printf("Checking adjacent vertex %d\n", adjVertex);
+            if (!visited[adjVertex])
             {
-                push(stack, adjList->dest);
+                printf("Pushing vertex %d onto stack\n", adjVertex);
+                push(stack, adjVertex);
             }
             adjList = adjList->next;
         }
     }
 
-    printf("\n");
     free(visited);
     freeStack(stack);
 }

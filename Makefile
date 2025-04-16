@@ -1,24 +1,39 @@
-# Variables
-CC = clang
+# Makefile propre pour le projet
+
+# Compilateur et options
+CC = gcc
 CFLAGS = -Wall -Wextra -g
-SRC = core/graph.c algorithms/dfs.c algorithms/bfs.c algorithms/graph_analysis.c algorithms/floyd_warshall.c algorithms/bellman_ford.c algorithms/tsp.c algorithms/multi_day_planning.c algorithms/greedy_algorithms.c algorithms/genetic_algorithm.c core/temporal_variations.c network/parser.c network/cJSON.c main.c
-OBJ = $(SRC:.c=.o)
-TARGET = main
 
-# Règle par défaut
-all: $(TARGET)
+# Répertoires
+SRC_DIR = .
+BUILD_DIR = ./build
 
-# Création de l'exécutable
-$(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^
+# Fichiers sources et objets
+MAIN_SRC = main.c
+DATA_GEN_SRC = data_generator.c
 
-# Compilation des fichiers objets
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+MAIN_OBJ = $(BUILD_DIR)/main.o
+DATA_GEN_OBJ = $(BUILD_DIR)/data_generator.o
+
+# Cibles
+all: main data_generator
+
+main: $(MAIN_OBJ)
+	$(CC) $(CFLAGS) -o main $(MAIN_OBJ) core/graph.c network/parser.c network/cJSON.c algorithms/bfs.c algorithms/dfs.c algorithms/floyd_warshall.c algorithms/tsp.c
+
+$(MAIN_OBJ): $(MAIN_SRC)
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $(MAIN_SRC) -o $(MAIN_OBJ)
+
+data_generator: $(DATA_GEN_OBJ)
+	$(CC) $(CFLAGS) -o data_generator $(DATA_GEN_OBJ) core/graph.c network/parser.c network/cJSON.c
+
+$(DATA_GEN_OBJ): $(DATA_GEN_SRC)
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $(DATA_GEN_SRC) -o $(DATA_GEN_OBJ)
 
 # Nettoyage
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -rf $(BUILD_DIR) main data_generator
 
-# Phony targets
 .PHONY: all clean

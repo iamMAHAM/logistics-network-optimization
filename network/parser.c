@@ -80,11 +80,58 @@ Graph *loadGraphFromJSON(const char *filename)
 }
 
 // Fonction pour sauvegarder un graphe dans un fichier JSON
+// Cette fonction crée un fichier JSON à partir d'un graphe en mémoire,
+// en suivant exactement le même format que les fichiers JSON existants.
 void saveGraphToJSON(Graph *graph, const char *filename)
 {
     cJSON *json = cJSON_CreateObject();
-    cJSON_AddNumberToObject(json, "vertices", graph->V);
 
+    // Création de la section "nodes"
+    cJSON *nodes = cJSON_CreateArray();
+    for (int i = 0; i < graph->V; ++i)
+    {
+        cJSON *node = cJSON_CreateObject();
+        cJSON_AddNumberToObject(node, "id", i);
+
+        // Déterminer le type de nœud en fonction de l'ID (pour l'exemple)
+        char *nodeType;
+        char nodeName[50];
+        if (i % 3 == 0)
+        {
+            nodeType = "hub";
+            sprintf(nodeName, "Hub %d", i);
+        }
+        else if (i % 3 == 1)
+        {
+            nodeType = "relay";
+            sprintf(nodeName, "Relais %d", i);
+        }
+        else
+        {
+            nodeType = "station";
+            sprintf(nodeName, "Station %d", i);
+        }
+
+        cJSON_AddStringToObject(node, "name", nodeName);
+        cJSON_AddStringToObject(node, "type", nodeType);
+
+        // Coordonnées aléatoires pour l'exemple (entre -10 et 10)
+        cJSON *coordinates = cJSON_CreateArray();
+        double x = ((double)rand() / RAND_MAX) * 20 - 10;
+        double y = ((double)rand() / RAND_MAX) * 20 - 10;
+        cJSON_AddItemToArray(coordinates, cJSON_CreateNumber(x));
+        cJSON_AddItemToArray(coordinates, cJSON_CreateNumber(y));
+        cJSON_AddItemToObject(node, "coordinates", coordinates);
+
+        // Capacité aléatoire entre 100 et 1000
+        int capacity = rand() % 901 + 100;
+        cJSON_AddNumberToObject(node, "capacity", capacity);
+
+        cJSON_AddItemToArray(nodes, node);
+    }
+    cJSON_AddItemToObject(json, "nodes", nodes);
+
+    // Création de la section "edges"
     cJSON *edges = cJSON_CreateArray();
     for (int v = 0; v < graph->V; ++v)
     {
@@ -92,26 +139,29 @@ void saveGraphToJSON(Graph *graph, const char *filename)
         while (current)
         {
             cJSON *edge = cJSON_CreateObject();
-            cJSON_AddNumberToObject(edge, "src", v);
-            cJSON_AddNumberToObject(edge, "dest", current->dest);
+            cJSON_AddNumberToObject(edge, "source", v);
+            cJSON_AddNumberToObject(edge, "destination", current->dest);
             cJSON_AddNumberToObject(edge, "distance", current->attr.distance);
             cJSON_AddNumberToObject(edge, "baseTime", current->attr.baseTime);
             cJSON_AddNumberToObject(edge, "cost", current->attr.cost);
             cJSON_AddNumberToObject(edge, "roadType", current->attr.roadType);
             cJSON_AddNumberToObject(edge, "reliability", current->attr.reliability);
             cJSON_AddNumberToObject(edge, "restrictions", current->attr.restrictions);
+
             cJSON_AddItemToArray(edges, edge);
             current = current->next;
         }
     }
     cJSON_AddItemToObject(json, "edges", edges);
 
+    // Écriture dans le fichier
     char *data = cJSON_Print(json);
     FILE *file = fopen(filename, "w");
     if (file)
     {
         fprintf(file, "%s", data);
         fclose(file);
+        printf("Graphe sauvegardé avec succès dans %s\n", filename);
     }
     else
     {

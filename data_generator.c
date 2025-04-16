@@ -1,0 +1,163 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>     // For strcmp
+#include "core/graph.h" // Ensure destroyGraph is declared
+#include "network/cJSON.h"
+#include <sys/stat.h>  // For stat
+#include <sys/types.h> // For mkdir
+
+// Function to generate random float between min and max
+float randomFloat(float min, float max)
+{
+    return min + ((float)rand() / RAND_MAX) * (max - min);
+}
+
+// Function to generate a random graph and save it as JSON
+void generateGraphJSON(const char *filename, int numNodes, int numEdges, const char *scenario)
+{
+    srand(time(NULL));
+
+    // Create a graph
+    Graph *graph = createGraph(numNodes);
+
+    // Ensure the graph is connected by adding a spanning tree
+    for (int i = 1; i < numNodes; i++)
+    {
+        int src = i - 1;
+        int dest = i;
+        EdgeAttr attr;
+        attr.distance = randomFloat(10.0, 50.0);  // Reasonable range for distance
+        attr.baseTime = randomFloat(5.0, 20.0);   // Reasonable range for base time
+        attr.cost = randomFloat(100.0, 500.0);    // Reasonable range for cost
+        attr.roadType = rand() % 3;               // 0: asphalt, 1: dirt, 2: gravel
+        attr.reliability = randomFloat(0.7, 1.0); // High reliability for spanning tree
+        attr.restrictions = 0;
+        addEdge(graph, src, dest, attr);
+    }
+
+    // Add random edges
+    for (int i = 0; i < numEdges; i++)
+    {
+        int src = rand() % numNodes;
+        int dest = rand() % numNodes;
+        if (src != dest)
+        {
+            EdgeAttr attr;
+            attr.distance = randomFloat(1.0, 100.0);
+            attr.baseTime = randomFloat(1.0, 60.0);
+            attr.cost = randomFloat(10.0, 1000.0);
+            attr.roadType = rand() % 3; // 0: asphalt, 1: dirt, 2: gravel
+            attr.reliability = randomFloat(0.5, 1.0);
+            attr.restrictions = 0;
+
+            // Adjust attributes based on scenario
+            if (strcmp(scenario, "peak") == 0)
+            {
+                attr.baseTime *= 1.5; // Increase travel time
+                attr.cost *= 1.2;     // Increase cost
+            }
+            else if (strcmp(scenario, "crisis") == 0)
+            {
+                if (rand() % 4 == 0)
+                {
+                    attr.reliability = randomFloat(0.1, 0.5); // Lower reliability
+                }
+            }
+
+            addEdge(graph, src, dest, attr);
+        }
+    }
+
+    // Create JSON object
+    cJSON *jsonGraph = cJSON_CreateObject();
+    cJSON *nodes = cJSON_CreateArray();
+    cJSON *edges = cJSON_CreateArray();
+
+    // Add nodes to JSON
+    for (int i = 0; i < numNodes; i++)
+    {
+        cJSON *node = cJSON_CreateObject();
+        cJSON_AddNumberToObject(node, "id", i);
+        char name[50];
+        snprintf(name, sizeof(name), "%s %d", (i % 3 == 0) ? "Hub" : ((i % 3 == 1) ? "Relais" : "Station"), i);
+        cJSON_AddStringToObject(node, "name", name);
+        cJSON_AddStringToObject(node, "type", (i % 3 == 0) ? "hub" : ((i % 3 == 1) ? "relay" : "station"));
+        cJSON *coordinates = cJSON_CreateArray();
+        cJSON_AddItemToArray(coordinates, cJSON_CreateNumber(randomFloat(4.0, 10.0)));  // Latitude
+        cJSON_AddItemToArray(coordinates, cJSON_CreateNumber(randomFloat(-8.0, -2.0))); // Longitude
+        cJSON_AddItemToObject(node, "coordinates", coordinates);
+        cJSON_AddNumberToObject(node, "capacity", rand() % 1000 + 100);
+        cJSON_AddItemToArray(nodes, node);
+    }
+
+    // Add edges to JSON
+    for (int i = 0; i < graph->V; i++)
+    {
+        AdjListNode *current = graph->array[i].head;
+        while (current)
+        {
+            cJSON *edge = cJSON_CreateObject();
+            cJSON_AddNumberToObject(edge, "source", i);
+            cJSON_AddNumberToObject(edge, "destination", current->dest);
+            cJSON_AddNumberToObject(edge, "distance", current->attr.distance);
+            cJSON_AddNumberToObject(edge, "baseTime", current->attr.baseTime);
+            cJSON_AddNumberToObject(edge, "cost", current->attr.cost);
+            cJSON_AddNumberToObject(edge, "roadType", current->attr.roadType);
+            cJSON_AddNumberToObject(edge, "reliability", current->attr.reliability);
+            cJSON_AddNumberToObject(edge, "restrictions", current->attr.restrictions);
+            cJSON_AddItemToArray(edges, edge);
+            current = current->next;
+        }
+    }
+
+    cJSON_AddItemToObject(jsonGraph, "nodes", nodes);
+    cJSON_AddItemToObject(jsonGraph, "edges", edges);
+
+    // Write JSON to file
+    FILE *file = fopen(filename, "w");
+    if (file)
+    {
+        char *jsonString = cJSON_Print(jsonGraph);
+        fprintf(file, "%s", jsonString);
+        fclose(file);
+        free(jsonString);
+    }
+
+    // Clean up
+    cJSON_Delete(jsonGraph);
+    freeGraph(graph);
+}
+
+int main()
+{
+    // Vérifier si le dossier 'datasets' existe, sinon le créer automatiquement
+    struct stat st = {0};
+    if (stat("datasets", &st) == -1)
+    {
+        printf("Le dossier 'datasets' n'existe pas. Création en cours...\n");
+        if (mkdir("datasets", 0700) == -1)
+        {
+            perror("Erreur lors de la création du dossier 'datasets'");
+            return 1;
+        }
+        printf("Dossier 'datasets' créé avec succès.\n");
+    }
+
+    // Generate small network datasets
+    generateGraphJSON("datasets/small_network_normal.json", 15, 30, "normal");
+    generateGraphJSON("datasets/small_network_peak.json", 15, 30, "peak");
+    generateGraphJSON("datasets/small_network_crisis.json", 15, 30, "crisis");
+
+    // Generate medium network datasets
+    generateGraphJSON("datasets/medium_network_normal.json", 120, 300, "normal");
+    generateGraphJSON("datasets/medium_network_peak.json", 120, 300, "peak");
+    generateGraphJSON("datasets/medium_network_crisis.json", 120, 300, "crisis");
+
+    // Generate large network datasets
+    generateGraphJSON("datasets/large_network_normal.json", 250, 600, "normal");
+    generateGraphJSON("datasets/large_network_peak.json", 250, 600, "peak");
+    generateGraphJSON("datasets/large_network_crisis.json", 250, 600, "crisis");
+
+    return 0;
+}

@@ -2,3 +2,8 @@
 output_network.json
 *.o
 main
+data_generator
+datasets/
+# Ignorer les dossiers de débogage générés par macOS
+*.dSYM/
+build/
