@@ -70,7 +70,3 @@
   Verify the structure of the input JSON files in the `datasets/` folder.
 - **Performance Issues**:
   For large datasets, consider using approximate algorithms for TSP and other NP-hard problems.
-
-### Contact
-
-For further assistance, please contact the development team at [support@example.com](mailto:support@example.com).
