@@ -10,9 +10,9 @@
 #include <float.h>
 #include <limits.h>
 
-#define MAX_TSP_SIZE 20 // Maximum number of vertices for TSP algorithm
+#define MAX_TSP_SIZE 20 // Nombre maximum de sommets pour l'algorithme TSP
 
-// Function to measure execution time
+// Fonction pour mesurer le temps d'exécution
 double measureExecutionTime(void (*algorithm)(Graph *), Graph *graph)
 {
     clock_t start = clock();
@@ -21,34 +21,34 @@ double measureExecutionTime(void (*algorithm)(Graph *), Graph *graph)
     return ((double)(end - start)) / CLOCKS_PER_SEC;
 }
 
-// Function to test and measure BFS
+// Fonction pour tester et mesurer BFS
 void testBFS(Graph *graph)
 {
-    printf("\nTesting BFS:\n");
+    printf("\nTest de BFS :\n");
     BFS(graph, 0);
 }
 
-// Update testDFS to call DFS directly with a valid startVertex
+// Mettre à jour testDFS pour appeler DFS directement avec un startVertex valide
 void testDFS(Graph *graph)
 {
-    printf("\nTesting DFS:\n");
-    int startVertex = 0; // Start DFS from vertex 0
+    printf("\nTest de DFS :\n");
+    int startVertex = 0; // Commencer DFS à partir du sommet 0
     DFS(graph, startVertex);
 }
 
-// Function to test and measure Floyd-Warshall
+// Fonction pour tester et mesurer Floyd-Warshall
 void testFloydWarshall(Graph *graph)
 {
-    printf("\nTesting Floyd-Warshall:\n");
+    printf("\nTest de Floyd-Warshall :\n");
 
-    // Convert adjacency list to adjacency matrix
+    // Convertir la liste d'adjacence en matrice d'adjacence
     double **adjMatrix = (double **)malloc(graph->V * sizeof(double *));
     for (int i = 0; i < graph->V; i++)
     {
         adjMatrix[i] = (double *)malloc(graph->V * sizeof(double));
         for (int j = 0; j < graph->V; j++)
         {
-            adjMatrix[i][j] = (i == j) ? 0 : DBL_MAX; // Initialize with 0 for self-loops, DBL_MAX for no direct edge
+            adjMatrix[i][j] = (i == j) ? 0 : DBL_MAX; // Initialiser avec 0 pour les boucles, DBL_MAX pour aucune arête directe
         }
 
         AdjListNode *current = graph->array[i].head;
@@ -59,14 +59,14 @@ void testFloydWarshall(Graph *graph)
         }
     }
 
-    // Measure execution time of Floyd-Warshall
+    // Mesurer le temps d'exécution de Floyd-Warshall
     clock_t start = clock();
     floydWarshall(adjMatrix, graph->V);
     clock_t end = clock();
 
-    printf("Execution time: %.6f seconds\n", ((double)(end - start)) / CLOCKS_PER_SEC);
+    printf("Temps d'exécution : %.6f secondes\n", ((double)(end - start)) / CLOCKS_PER_SEC);
 
-    // Free adjacency matrix
+    // Libérer la matrice d'adjacence
     for (int i = 0; i < graph->V; i++)
     {
         free(adjMatrix[i]);
@@ -74,25 +74,25 @@ void testFloydWarshall(Graph *graph)
     free(adjMatrix);
 }
 
-// Function to test and measure TSP
+// Fonction pour tester et mesurer TSP
 void testTSP(Graph *graph)
 {
-    printf("\nTesting TSP:\n");
+    printf("\nTest de TSP :\n");
 
-    // Check graph size to avoid memory issues
+    // Vérifier la taille du graphe pour éviter les problèmes de mémoire
     if (graph->V > MAX_TSP_SIZE)
     {
-        printf("Graph is too large for the TSP algorithm (has %d vertices). Maximum supported size is %d vertices.\n",
+        printf("Le graphe est trop grand pour l'algorithme TSP (contient %d sommets). La taille maximale prise en charge est de %d sommets.\n",
                graph->V, MAX_TSP_SIZE);
-        printf("Skipping TSP test for this graph.\n");
+        printf("Test TSP ignoré pour ce graphe.\n");
         return;
     }
 
-    // Convert adjacency list to adjacency matrix
+    // Convertir la liste d'adjacence en matrice d'adjacence
     double **adjMatrix = (double **)malloc(graph->V * sizeof(double *));
     if (!adjMatrix)
     {
-        printf("Memory allocation failed for adjacency matrix.\n");
+        printf("Échec de l'allocation de mémoire pour la matrice d'adjacence.\n");
         return;
     }
 
@@ -101,8 +101,8 @@ void testTSP(Graph *graph)
         adjMatrix[i] = (double *)malloc(graph->V * sizeof(double));
         if (!adjMatrix[i])
         {
-            printf("Memory allocation failed for adjacency matrix row %d.\n", i);
-            // Free previously allocated memory
+            printf("Échec de l'allocation de mémoire pour la ligne %d de la matrice d'adjacence.\n", i);
+            // Libérer la mémoire précédemment allouée
             for (int j = 0; j < i; j++)
             {
                 free(adjMatrix[j]);
@@ -113,7 +113,7 @@ void testTSP(Graph *graph)
 
         for (int j = 0; j < graph->V; j++)
         {
-            adjMatrix[i][j] = (i == j) ? 0 : DBL_MAX; // Initialize with 0 for self-loops, DBL_MAX for no direct edge
+            adjMatrix[i][j] = (i == j) ? 0 : DBL_MAX; // Initialiser avec 0 pour les boucles, DBL_MAX pour aucune arête directe
         }
 
         AdjListNode *current = graph->array[i].head;
@@ -124,12 +124,12 @@ void testTSP(Graph *graph)
         }
     }
 
-    // Convert adjacency list to adjacency matrix (int version)
+    // Convertir la liste d'adjacence en matrice d'adjacence (version entière)
     int **intAdjMatrix = (int **)malloc(graph->V * sizeof(int *));
     if (!intAdjMatrix)
     {
-        printf("Memory allocation failed for integer adjacency matrix.\n");
-        // Free double adjacency matrix
+        printf("Échec de l'allocation de mémoire pour la matrice d'adjacence entière.\n");
+        // Libérer la matrice d'adjacence double
         for (int i = 0; i < graph->V; i++)
         {
             free(adjMatrix[i]);
@@ -143,15 +143,15 @@ void testTSP(Graph *graph)
         intAdjMatrix[i] = (int *)malloc(graph->V * sizeof(int));
         if (!intAdjMatrix[i])
         {
-            printf("Memory allocation failed for integer adjacency matrix row %d.\n", i);
-            // Free previously allocated memory
+            printf("Échec de l'allocation de mémoire pour la ligne %d de la matrice d'adjacence entière.\n", i);
+            // Libérer la mémoire précédemment allouée
             for (int j = 0; j < i; j++)
             {
                 free(intAdjMatrix[j]);
             }
             free(intAdjMatrix);
 
-            // Free double adjacency matrix
+            // Libérer la matrice d'adjacence double
             for (int j = 0; j < graph->V; j++)
             {
                 free(adjMatrix[j]);
@@ -166,17 +166,17 @@ void testTSP(Graph *graph)
         }
     }
 
-    // Call TSP solver
+    // Appeler le solveur TSP
     solveTSP(intAdjMatrix, graph->V);
 
-    // Free int adjacency matrix
+    // Libérer la matrice d'adjacence entière
     for (int i = 0; i < graph->V; i++)
     {
         free(intAdjMatrix[i]);
     }
     free(intAdjMatrix);
 
-    // Free adjacency matrix
+    // Libérer la matrice d'adjacence double
     for (int i = 0; i < graph->V; i++)
     {
         free(adjMatrix[i]);
@@ -202,13 +202,13 @@ int main()
     for (int i = 0; i < numDatasets; i++)
     {
         printf("\n==============================\n");
-        printf("Testing dataset: %s\n", datasets[i]);
+        printf("Test du dataset : %s\n", datasets[i]);
         printf("==============================\n");
 
         Graph *graph = loadGraphFromJSON(datasets[i]);
         if (!graph)
         {
-            printf("Failed to load graph from %s\n", datasets[i]);
+            printf("Échec du chargement du graphe depuis %s\n", datasets[i]);
             continue;
         }
 

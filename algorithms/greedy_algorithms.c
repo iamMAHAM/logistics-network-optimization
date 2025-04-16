@@ -156,7 +156,7 @@ void greedyRouteScheduling(Graph *graph, Vehicle *vehicles, int vehicleCount)
             {
                 // Si aucune destination n'est directement accessible, on pourrait implémenter
                 // un algorithme du plus court chemin comme Dijkstra ici
-                printf("Erreur: Impossible de trouver un chemin complet pour le véhicule %d\n", vehicle->id);
+                printf("Erreur : Impossible de trouver un chemin complet pour le véhicule %d\n", vehicle->id);
                 break;
             }
         }
@@ -291,7 +291,7 @@ Package *createPackages(int count, int maxWeight, int maxDestination)
 {
     if (maxDestination <= 0)
     {
-        printf("Erreur: maxDestination doit être positif\n");
+        printf("Erreur : maxDestination doit être positif\n");
         return NULL;
     }
 

@@ -24,11 +24,11 @@ void push(Stack *stack, int value)
 {
     if (stack->top + 1 >= stack->capacity)
     {
-        printf("Error: Stack overflow while pushing %d\n", value);
+        printf("Erreur : Dépassement de la pile lors de l'ajout de %d\n", value);
         return;
     }
     stack->data[++stack->top] = value;
-    printf("Pushed %d onto the stack.\n", value);
+    printf("Ajouté %d à la pile.\n", value);
 }
 
 // Dépile un élément
@@ -36,11 +36,11 @@ int pop(Stack *stack)
 {
     if (isStackEmpty(stack))
     {
-        printf("Error: Stack underflow while popping.\n");
-        return -1; // Return an invalid value to indicate error
+        printf("Erreur : Sous-dépassement de la pile lors du retrait.\n");
+        return -1; // Retourne une valeur invalide pour indiquer une erreur
     }
     int value = stack->data[stack->top--];
-    printf("Popped %d from the stack.\n", value);
+    printf("Retiré %d de la pile.\n", value);
     return value;
 }
 
@@ -62,16 +62,16 @@ void DFS(Graph *graph, int startVertex)
     }
 
     push(stack, startVertex);
-    printf("Starting DFS from vertex %d\n", startVertex);
+    printf("Début du DFS à partir du sommet %d\n", startVertex);
 
     while (!isStackEmpty(stack))
     {
         int currentVertex = pop(stack);
-        printf("Popped vertex %d from stack\n", currentVertex);
+        printf("Sommet %d retiré de la pile\n", currentVertex);
 
         if (!visited[currentVertex])
         {
-            printf("Visiting vertex %d\n", currentVertex);
+            printf("Visite du sommet %d\n", currentVertex);
             visited[currentVertex] = true;
         }
 
@@ -79,10 +79,10 @@ void DFS(Graph *graph, int startVertex)
         while (adjList != NULL)
         {
             int adjVertex = adjList->dest;
-            printf("Checking adjacent vertex %d\n", adjVertex);
+            printf("Vérification du sommet adjacent %d\n", adjVertex);
             if (!visited[adjVertex])
             {
-                printf("Pushing vertex %d onto stack\n", adjVertex);
+                printf("Ajout du sommet %d à la pile\n", adjVertex);
                 push(stack, adjVertex);
             }
             adjList = adjList->next;
