@@ -1,4 +1,6 @@
 #include "graph.h"
+#include <float.h>  // For DBL_MAX
+#include <limits.h> // For INT_MAX
 
 // Fonction pour créer un graphe avec V sommets
 Graph *createGraph(int V)
@@ -131,4 +133,68 @@ void displayAdjacencyList(Graph *graph)
         }
         printf("\n");
     }
+}
+
+// Convert adjacency list to adjacency matrix (double)
+double **convertGraphToAdjMatrix(Graph *graph)
+{
+    double **matrix = (double **)malloc(graph->V * sizeof(double *));
+    for (int i = 0; i < graph->V; i++)
+    {
+        matrix[i] = (double *)malloc(graph->V * sizeof(double));
+        for (int j = 0; j < graph->V; j++)
+        {
+            matrix[i][j] = (i == j) ? 0 : DBL_MAX; // Initialize with 0 for self-loops, DBL_MAX for no direct edge
+        }
+
+        AdjListNode *current = graph->array[i].head;
+        while (current)
+        {
+            matrix[i][current->dest] = current->attr.distance;
+            current = current->next;
+        }
+    }
+    return matrix;
+}
+
+// Free adjacency matrix (double)
+void freeAdjMatrix(double **matrix, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        free(matrix[i]);
+    }
+    free(matrix);
+}
+
+// Convert adjacency list to adjacency matrix (int)
+int **convertGraphToIntAdjMatrix(Graph *graph)
+{
+    int **matrix = (int **)malloc(graph->V * sizeof(int *));
+    for (int i = 0; i < graph->V; i++)
+    {
+        matrix[i] = (int *)malloc(graph->V * sizeof(int));
+        for (int j = 0; j < graph->V; j++)
+        {
+            matrix[i][j] = (i == j) ? 0 : INT_MAX; // Initialize with 0 for self-loops, INT_MAX for no direct edge
+        }
+
+        AdjListNode *current = graph->array[i].head;
+        while (current)
+        {
+            matrix[i][current->dest] = (int)current->attr.distance;
+            current = current->next;
+        }
+    }
+    return matrix;
+}
+
+// Free adjacency matrix (int)
+void freeIntAdjMatrix(int **matrix, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        free(matrix[i]);
+    }
+    free(matrix);
 }

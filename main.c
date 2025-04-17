@@ -7,10 +7,101 @@
 #include "algorithms/dfs.h"
 #include "algorithms/floyd_warshall.h"
 #include "algorithms/tsp.h"
+#include "algorithms/bellman_ford.h"
+#include "algorithms/genetic_algorithm.h"
+#include "algorithms/multi_day_planning.h"
 #include <float.h>
 #include <limits.h>
+#include <sys/resource.h> // For memory usage
 
 #define MAX_TSP_SIZE 20 // Nombre maximum de sommets pour l'algorithme TSP
+
+// Wrapper for BFS to match the expected signature
+void BFSWrapper(Graph *graph)
+{
+    BFS(graph, 0); // Start BFS from vertex 0
+}
+
+// Wrapper for DFS to match the expected signature
+void DFSWrapper(Graph *graph)
+{
+    DFS(graph, 0); // Start DFS from vertex 0
+}
+
+// Wrapper for Floyd-Warshall
+void FloydWarshallWrapper(Graph *graph)
+{
+    double **adjMatrix = convertGraphToAdjMatrix(graph);
+    floydWarshall(adjMatrix, graph->V);
+    freeAdjMatrix(adjMatrix, graph->V);
+}
+
+// Correcting Bellman-Ford call
+void BellmanFordWrapper(Graph *graph)
+{
+    double *dist = (double *)malloc(graph->V * sizeof(double));
+    int *predecessor = (int *)malloc(graph->V * sizeof(int));
+    if (!dist || !predecessor)
+    {
+        fprintf(stderr, "Erreur : Échec de l'allocation de mémoire pour Bellman-Ford.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    bellmanFord(graph, 0, dist, predecessor);
+
+    free(dist);
+    free(predecessor);
+}
+
+// Wrapper for TSP
+void TSPWrapper(Graph *graph)
+{
+    int **adjMatrix = convertGraphToIntAdjMatrix(graph);
+    solveTSP(adjMatrix, graph->V);
+    freeIntAdjMatrix(adjMatrix, graph->V);
+}
+
+// Correcting Genetic Algorithm call
+void GeneticAlgorithmWrapper(Graph *graph)
+{
+    // Create example vehicles
+    int vehicleCount = 10;
+    Vehicle *vehicles = createVehicles(vehicleCount, 100); // Example: 10 vehicles with capacity 100
+
+    // Create example packages
+    int packageCount = 10;
+    Package *packages = (Package *)malloc(packageCount * sizeof(Package));
+    for (int i = 0; i < packageCount; i++)
+    {
+        packages[i].id = i;
+        packages[i].source = rand() % graph->V;
+        packages[i].destination = rand() % graph->V;
+        packages[i].weight = rand() % 50 + 1;  // Random weight between 1 and 50
+        packages[i].priority = rand() % 3 + 1; // Priority between 1 and 3
+    }
+
+    // Create example GAConfig
+    GAConfig config;
+    config.populationSize = 100;
+    config.maxGenerations = 50;
+    config.mutationRate = 0.1;
+    config.crossoverRate = 0.9;
+
+    // Run genetic algorithm
+    runGeneticAlgorithm(graph, vehicles, vehicleCount, packages, packageCount, config);
+
+    // Free allocated memory
+    free(packages);
+    freeVehicles(vehicles, vehicleCount);
+}
+
+// Wrapper for Multi-Day Delivery Planning
+void MultiDayPlanningWrapper(Graph *graph)
+{
+    int **costMatrix = convertGraphToIntAdjMatrix(graph);
+    multiDayDeliveryPlanning(costMatrix, graph->V, 3); // Example: Plan for 3 days
+    freeIntAdjMatrix(costMatrix, graph->V);
+}
 
 // Fonction pour mesurer le temps d'exécution
 double measureExecutionTime(void (*algorithm)(Graph *), Graph *graph)
@@ -19,6 +110,14 @@ double measureExecutionTime(void (*algorithm)(Graph *), Graph *graph)
     algorithm(graph);
     clock_t end = clock();
     return ((double)(end - start)) / CLOCKS_PER_SEC;
+}
+
+// Fonction pour mesurer l'utilisation de la mémoire
+long getMemoryUsage()
+{
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    return usage.ru_maxrss; // Memory usage in kilobytes
 }
 
 // Fonction pour tester et mesurer BFS
@@ -184,6 +283,57 @@ void testTSP(Graph *graph)
     free(adjMatrix);
 }
 
+// Fonction pour comparer les performances des algorithmes
+void compareAlgorithms(Graph *graph)
+{
+    printf("\nComparaison des algorithmes :\n");
+
+    long memoryBefore, memoryAfter;
+    double executionTime;
+
+    // BFS
+    memoryBefore = getMemoryUsage();
+    executionTime = measureExecutionTime(BFSWrapper, graph);
+    memoryAfter = getMemoryUsage();
+    printf("BFS - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+
+    // DFS
+    memoryBefore = getMemoryUsage();
+    executionTime = measureExecutionTime(DFSWrapper, graph);
+    memoryAfter = getMemoryUsage();
+    printf("DFS - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+
+    // Floyd-Warshall
+    memoryBefore = getMemoryUsage();
+    executionTime = measureExecutionTime(FloydWarshallWrapper, graph);
+    memoryAfter = getMemoryUsage();
+    printf("Floyd-Warshall - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+
+    // Bellman-Ford
+    memoryBefore = getMemoryUsage();
+    executionTime = measureExecutionTime(BellmanFordWrapper, graph);
+    memoryAfter = getMemoryUsage();
+    printf("Bellman-Ford - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+
+    // TSP
+    memoryBefore = getMemoryUsage();
+    executionTime = measureExecutionTime(TSPWrapper, graph);
+    memoryAfter = getMemoryUsage();
+    printf("TSP - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+
+    // Genetic Algorithm
+    memoryBefore = getMemoryUsage();
+    executionTime = measureExecutionTime(GeneticAlgorithmWrapper, graph);
+    memoryAfter = getMemoryUsage();
+    printf("Algorithme génétique - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+
+    // Multi-Day Delivery Planning
+    memoryBefore = getMemoryUsage();
+    executionTime = measureExecutionTime(MultiDayPlanningWrapper, graph);
+    memoryAfter = getMemoryUsage();
+    printf("Planification multi-jours - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+}
+
 int main()
 {
     const char *datasets[] = {
@@ -212,10 +362,7 @@ int main()
             continue;
         }
 
-        testBFS(graph);
-        testDFS(graph);
-        testFloydWarshall(graph);
-        testTSP(graph);
+        compareAlgorithms(graph);
 
         freeGraph(graph);
     }

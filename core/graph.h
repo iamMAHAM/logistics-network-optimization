@@ -50,4 +50,10 @@ void displayAdjacencyList(Graph *graph);
 void DFS(Graph *graph, int startVertex);
 void BFS(Graph *graph, int startVertex);
 
+// Déclarations des fonctions de conversion et de libération des matrices d'adjacence
+double **convertGraphToAdjMatrix(Graph *graph);
+void freeAdjMatrix(double **matrix, int size);
+int **convertGraphToIntAdjMatrix(Graph *graph);
+void freeIntAdjMatrix(int **matrix, int size);
+
 #endif // GRAPH_H

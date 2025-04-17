@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define STACK_CAPACITY_MULTIPLIER 2 // Multiplier pour augmenter la capacité de la pile
+
 // Initialisation de la pile
 Stack *createStack(int capacity)
 {
@@ -13,22 +15,33 @@ Stack *createStack(int capacity)
     return stack;
 }
 
+// Fonction pour redimensionner dynamiquement la pile
+void resizeStack(Stack *stack)
+{
+    stack->capacity *= STACK_CAPACITY_MULTIPLIER;
+    stack->data = (int *)realloc(stack->data, stack->capacity * sizeof(int));
+    if (!stack->data)
+    {
+        fprintf(stderr, "Erreur : Échec du redimensionnement de la pile.\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
 // Vérifie si la pile est vide
 bool isStackEmpty(Stack *stack)
 {
     return stack->top == -1;
 }
 
-// Empile un élément
+// Empile un élément avec redimensionnement si nécessaire
 void push(Stack *stack, int value)
 {
     if (stack->top + 1 >= stack->capacity)
     {
-        printf("Erreur : Dépassement de la pile lors de l'ajout de %d\n", value);
-        return;
+        printf("Redimensionnement de la pile. Nouvelle capacité : %d\n", stack->capacity * STACK_CAPACITY_MULTIPLIER);
+        resizeStack(stack);
     }
     stack->data[++stack->top] = value;
-    printf("Ajouté %d à la pile.\n", value);
 }
 
 // Dépile un élément
@@ -40,7 +53,6 @@ int pop(Stack *stack)
         return -1; // Retourne une valeur invalide pour indiquer une erreur
     }
     int value = stack->data[stack->top--];
-    printf("Retiré %d de la pile.\n", value);
     return value;
 }
 
@@ -62,16 +74,13 @@ void DFS(Graph *graph, int startVertex)
     }
 
     push(stack, startVertex);
-    printf("Début du DFS à partir du sommet %d\n", startVertex);
 
     while (!isStackEmpty(stack))
     {
         int currentVertex = pop(stack);
-        printf("Sommet %d retiré de la pile\n", currentVertex);
 
         if (!visited[currentVertex])
         {
-            printf("Visite du sommet %d\n", currentVertex);
             visited[currentVertex] = true;
         }
 
@@ -79,10 +88,8 @@ void DFS(Graph *graph, int startVertex)
         while (adjList != NULL)
         {
             int adjVertex = adjList->dest;
-            printf("Vérification du sommet adjacent %d\n", adjVertex);
             if (!visited[adjVertex])
             {
-                printf("Ajout du sommet %d à la pile\n", adjVertex);
                 push(stack, adjVertex);
             }
             adjList = adjList->next;

@@ -7,3 +7,4 @@ datasets/
 # Ignorer les dossiers de débogage générés par macOS
 *.dSYM/
 build/
+report
