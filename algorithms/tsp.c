@@ -12,7 +12,9 @@ int tsp(int **graph, int n, int pos, int visited, int **dp)
     // Check for invalid inputs
     if (pos < 0 || pos >= n || visited < 0)
     {
+        /*
         printf("Error: Invalid parameters in tsp function: pos=%d, visited=%d\n", pos, visited);
+        */
         return INT_MAX;
     }
 
@@ -59,7 +61,9 @@ void solveTSP(int **graph, int n)
     // Check if the graph is too large for our algorithm
     if (n > MAX_TSP_SIZE)
     {
+        /* Commenté pour éviter l'encombrement du rapport
         printf("Error: Graph too large for TSP algorithm. Maximum size is %d vertices.\n", MAX_TSP_SIZE);
+        */
         return;
     }
 
@@ -67,7 +71,9 @@ void solveTSP(int **graph, int n)
     int **dp = (int **)malloc(n * sizeof(int *));
     if (!dp)
     {
+        /* Commenté pour éviter l'encombrement du rapport
         printf("Error: Failed to allocate memory for dp table\n");
+        */
         return;
     }
 
@@ -76,7 +82,9 @@ void solveTSP(int **graph, int n)
         dp[i] = (int *)malloc((1 << n) * sizeof(int));
         if (!dp[i])
         {
+            /* Commenté pour éviter l'encombrement du rapport
             printf("Error: Failed to allocate memory for dp[%d]\n", i);
+            */
             // Free previously allocated memory
             for (int j = 0; j < i; j++)
             {
@@ -94,11 +102,15 @@ void solveTSP(int **graph, int n)
 
     if (result == INT_MAX)
     {
+        /* Commenté pour éviter l'encombrement du rapport
         printf("No valid TSP tour found (possibly disconnected graph)\n");
+        */
     }
     else
     {
+        /* Commenté pour éviter l'encombrement du rapport
         printf("Coût minimum pour le TSP : %d\n", result);
+        */
     }
 
     // Free allocated memory

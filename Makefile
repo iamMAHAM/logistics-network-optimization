@@ -21,7 +21,7 @@ REPORT_OBJ = $(BUILD_DIR)/compare_algorithms_report.o
 all: main data_generator report
 
 main: $(MAIN_OBJ)
-	$(CC) $(CFLAGS) -o main $(MAIN_OBJ) core/graph.c network/parser.c network/cJSON.c algorithms/bfs.c algorithms/dfs.c algorithms/floyd_warshall.c algorithms/tsp.c algorithms/bellman_ford.c algorithms/genetic_algorithm.c algorithms/multi_day_planning.c
+	$(CC) $(CFLAGS) -o main $(MAIN_OBJ) core/graph.c network/parser.c network/cJSON.c algorithms/bfs.c algorithms/dfs.c algorithms/floyd_warshall.c algorithms/tsp.c algorithms/bellman_ford.c algorithms/genetic_algorithm.c algorithms/multi_day_planning.c algorithms/greedy_algorithms.c
 
 $(MAIN_OBJ): $(MAIN_SRC)
 	mkdir -p $(BUILD_DIR)

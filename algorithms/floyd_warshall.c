@@ -30,18 +30,18 @@ void floydWarshall(double **graph, int V)
         }
     }
 
-    printf("Matrice des plus courts chemins (Floyd-Warshall) :\n");
-    for (int i = 0; i < V; i++)
-    {
-        for (int j = 0; j < V; j++)
-        {
-            if (dist[i][j] == DBL_MAX)
-                printf("INF ");
-            else
-                printf("%.2f ", dist[i][j]);
-        }
-        printf("\n");
-    }
+    // printf("Matrice des plus courts chemins (Floyd-Warshall) :\n");
+    // for (int i = 0; i < V; i++)
+    // {
+    //     for (int j = 0; j < V; j++)
+    //     {
+    //         if (dist[i][j] == DBL_MAX)
+    //             printf("INF ");
+    //         else
+    //             printf("%.2f ", dist[i][j]);
+    //     }
+    //     printf("\n");
+    // }
 
     for (int i = 0; i < V; i++)
     {

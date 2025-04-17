@@ -72,13 +72,13 @@ int greedyPackageAssignment(Package *packages, int packageCount, Vehicle *vehicl
             // Incrémenter le compteur de colis affectés
             assignedCount++;
 
-            printf("Colis %d (priorité %d, poids %d) affecté au véhicule %d\n",
-                   packages[i].id, packages[i].priority, packages[i].weight, vehicle->id);
+            // printf("Colis %d (priorité %d, poids %d) affecté au véhicule %d\n",
+            //        packages[i].id, packages[i].priority, packages[i].weight, vehicle->id);
         }
         else
         {
-            printf("Impossible d'affecter le colis %d (priorité %d, poids %d) à un véhicule\n",
-                   packages[i].id, packages[i].priority, packages[i].weight);
+            // printf("Impossible d'affecter le colis %d (priorité %d, poids %d) à un véhicule\n",
+            //        packages[i].id, packages[i].priority, packages[i].weight);
         }
     }
 
@@ -156,7 +156,7 @@ void greedyRouteScheduling(Graph *graph, Vehicle *vehicles, int vehicleCount)
             {
                 // Si aucune destination n'est directement accessible, on pourrait implémenter
                 // un algorithme du plus court chemin comme Dijkstra ici
-                printf("Erreur : Impossible de trouver un chemin complet pour le véhicule %d\n", vehicle->id);
+                // printf("Erreur : Impossible de trouver un chemin complet pour le véhicule %d\n", vehicle->id);
                 break;
             }
         }
@@ -165,14 +165,14 @@ void greedyRouteScheduling(Graph *graph, Vehicle *vehicles, int vehicleCount)
         vehicle->route[vehicle->packageCount] = vehicle->location;
 
         // Afficher la route planifiée
-        printf("Route planifiée pour le véhicule %d: ", vehicle->id);
-        for (int i = 0; i < vehicle->routeLength; i++)
-        {
-            printf("%d ", vehicle->route[i]);
-            if (i < vehicle->routeLength - 1)
-                printf("-> ");
-        }
-        printf("\n");
+        // printf("Route planifiée pour le véhicule %d: ", vehicle->id);
+        // for (int i = 0; i < vehicle->routeLength; i++)
+        // {
+        //     printf("%d ", vehicle->route[i]);
+        //     if (i < vehicle->routeLength - 1)
+        //         printf("-> ");
+        // }
+        // printf("\n");
 
         // Libérer la mémoire
         free(destinations);

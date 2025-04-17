@@ -60,17 +60,21 @@ void multiDayDeliveryPlanning(int **costMatrix, int n, int days)
         }
     }
 
-    // Afficher le résultat
+    // Affichage commenté pour éviter l'encombrement du rapport
     if (minCost == INT_MAX)
     {
+        /*
         printf("Impossible de planifier les livraisons sur %d jours.\n", days);
+        */
     }
     else
     {
+        /*
         printf("Coût minimum pour la planification sur %d jours : %d\n", days, minCost);
 
         // Reconstruire et afficher le chemin optimal
         printf("Itinéraire de livraison optimal :\n");
+        */
 
         int *route = (int *)malloc((days + 1) * sizeof(int));
         int node = finalNode;
@@ -82,10 +86,12 @@ void multiDayDeliveryPlanning(int **costMatrix, int n, int days)
             route[d - 1] = node;
         }
 
+        /* Affichage commenté pour éviter l'encombrement du rapport
         for (int d = 0; d <= days; d++)
         {
             printf("Jour %d: Nœud %d\n", d, route[d]);
         }
+        */
 
         free(route);
     }

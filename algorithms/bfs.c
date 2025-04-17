@@ -52,7 +52,7 @@ void BFS(Graph *graph, int startVertex)
     while (!isQueueEmpty(queue))
     {
         int currentVertex = dequeue(queue);
-        printf("%d ", currentVertex);
+        // printf("%d ", currentVertex);
 
         AdjListNode *adjList = graph->array[currentVertex].head;
         while (adjList)

@@ -575,8 +575,8 @@ void runGreedy(Graph *graph, AlgorithmMetrics *metrics, ExecutionTimeMetrics *ti
                 // Vérifier que les indices sont valides
                 if (from < 0 || from >= graph->V || to < 0 || to >= graph->V)
                 {
-                    fprintf(stderr, "Indices de route non valides: from=%d, to=%d, graph->V=%d\n",
-                            from, to, graph->V);
+                    // fprintf(stderr, "Indices de route non valides: from=%d, to=%d, graph->V=%d\n",
+                    //         from, to, graph->V);
                     continue;
                 }
 
@@ -635,7 +635,7 @@ void runTSP(Graph *graph, AlgorithmMetrics *metrics, ExecutionTimeMetrics *timeM
     // Si le graphe est trop grand, sauter le TSP
     if (graph->V > 20)
     {
-        fprintf(stderr, "Graphe trop grand pour TSP, ignoré pour %d nœuds.\n", graph->V);
+        // fprintf(stderr, "Graphe trop grand pour TSP, ignoré pour %d nœuds.\n", graph->V);
         return;
     }
 
@@ -739,7 +739,7 @@ int main()
     // Exécuter les algorithmes sur chaque dataset
     for (int i = 0; i < numDatasets; i++)
     {
-        printf("Traitement du dataset: %s\n", datasets[i]);
+        // printf("Traitement du dataset: %s\n", datasets[i]);
 
         // Charger le graphe depuis le fichier JSON
         Graph *graph = loadGraphFromJSON(datasets[i]);

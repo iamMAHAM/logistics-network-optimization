@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
+#include <ctype.h>
 #include "core/graph.h"
 #include "network/parser.h"
 #include "algorithms/bfs.h"
@@ -12,9 +14,47 @@
 #include "algorithms/multi_day_planning.h"
 #include <float.h>
 #include <limits.h>
-#include <sys/resource.h> // For memory usage
+#include <sys/resource.h> // Pour l'utilisation de la mémoire
+#include "main.h"
 
-#define MAX_TSP_SIZE 20 // Nombre maximum de sommets pour l'algorithme TSP
+// Définition des noms des datasets pour un affichage plus ergonomique
+const char *datasets[] = {
+    "datasets/small_network_normal.json",
+    "datasets/small_network_peak.json",
+    "datasets/small_network_crisis.json",
+    "datasets/medium_network_normal.json",
+    "datasets/medium_network_peak.json",
+    "datasets/medium_network_crisis.json",
+    "datasets/large_network_normal.json",
+    "datasets/large_network_peak.json",
+    "datasets/large_network_crisis.json"};
+
+const char *dataset_names[] = {
+    "Petit réseau - Condition normale",
+    "Petit réseau - Heure de pointe",
+    "Petit réseau - Condition de crise",
+    "Réseau moyen - Condition normale",
+    "Réseau moyen - Heure de pointe",
+    "Réseau moyen - Condition de crise",
+    "Grand réseau - Condition normale",
+    "Grand réseau - Heure de pointe",
+    "Grand réseau - Condition de crise"};
+
+// Fonction utilitaire pour compter les arêtes dans un graphe
+int countEdges(Graph *graph)
+{
+    int count = 0;
+    for (int i = 0; i < graph->V; i++)
+    {
+        AdjListNode *current = graph->array[i].head;
+        while (current)
+        {
+            count++;
+            current = current->next;
+        }
+    }
+    return count;
+}
 
 // Wrapper for BFS to match the expected signature
 void BFSWrapper(Graph *graph)
@@ -120,252 +160,304 @@ long getMemoryUsage()
     return usage.ru_maxrss; // Memory usage in kilobytes
 }
 
-// Fonction pour tester et mesurer BFS
-void testBFS(Graph *graph)
+/**
+ * @brief Vider le buffer d'entrée
+ * Fonction utilitaire pour nettoyer le tampon d'entrée après saisie
+ */
+void flushInputBuffer()
 {
-    printf("\nTest de BFS :\n");
-    BFS(graph, 0);
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
 }
 
-// Mettre à jour testDFS pour appeler DFS directement avec un startVertex valide
-void testDFS(Graph *graph)
+/**
+ * @brief Obtenir une entrée entière sécurisée
+ * Lit une entrée utilisateur et s'assure qu'il s'agit d'un entier valide
+ * @return Le nombre entier entré par l'utilisateur, -1 en cas d'erreur
+ */
+int getValidIntegerInput()
 {
-    printf("\nTest de DFS :\n");
-    int startVertex = 0; // Commencer DFS à partir du sommet 0
-    DFS(graph, startVertex);
-}
-
-// Fonction pour tester et mesurer Floyd-Warshall
-void testFloydWarshall(Graph *graph)
-{
-    printf("\nTest de Floyd-Warshall :\n");
-
-    // Convertir la liste d'adjacence en matrice d'adjacence
-    double **adjMatrix = (double **)malloc(graph->V * sizeof(double *));
-    for (int i = 0; i < graph->V; i++)
+    char buffer[MAX_INPUT_SIZE];
+    if (fgets(buffer, sizeof(buffer), stdin) == NULL)
     {
-        adjMatrix[i] = (double *)malloc(graph->V * sizeof(double));
-        for (int j = 0; j < graph->V; j++)
-        {
-            adjMatrix[i][j] = (i == j) ? 0 : DBL_MAX; // Initialiser avec 0 pour les boucles, DBL_MAX pour aucune arête directe
-        }
+        return -1;
+    }
 
-        AdjListNode *current = graph->array[i].head;
-        while (current)
+    // Supprimer le caractère de nouvelle ligne
+    size_t len = strlen(buffer);
+    if (len > 0 && buffer[len - 1] == '\n')
+    {
+        buffer[len - 1] = '\0';
+    }
+
+    // Vérifier que tous les caractères sont des chiffres
+    for (size_t i = 0; i < strlen(buffer); i++)
+    {
+        if (!isdigit((unsigned char)buffer[i]))
         {
-            adjMatrix[i][current->dest] = current->attr.distance;
-            current = current->next;
+            return -1;
         }
     }
 
-    // Mesurer le temps d'exécution de Floyd-Warshall
+    // Convertir en entier
+    char *endptr;
+    long val = strtol(buffer, &endptr, 10);
+
+    // Vérifier les erreurs de conversion
+    if (*endptr != '\0' || val < 0 || val > INT_MAX)
+    {
+        return -1;
+    }
+
+    return (int)val;
+}
+
+/**
+ * @brief Afficher le menu pour sélectionner un dataset
+ * @return L'index du dataset choisi ou -1 en cas d'annulation
+ */
+int showDatasetSelectionMenu()
+{
+    int numDatasets = sizeof(datasets) / sizeof(datasets[0]);
+    int choice;
+
+    while (1)
+    {
+        CLEAR_SCREEN();
+        printf("\n\n");
+        printf("╔════════════════════════════════════════════════╗\n");
+        printf("║             SÉLECTION DU DATASET                ║\n");
+        printf("╠════════════════════════════════════════════════╣\n");
+
+        for (int i = 0; i < numDatasets; i++)
+        {
+            printf("║ %2d. %-42s ║\n", i + 1, dataset_names[i]);
+        }
+
+        printf("║ %2d. Retour au menu précédent                   ║\n", numDatasets + 1);
+        printf("╚════════════════════════════════════════════════╝\n\n");
+
+        printf("Entrez votre choix (1-%d): ", numDatasets + 1);
+        choice = getValidIntegerInput();
+
+        if (choice >= 1 && choice <= numDatasets)
+        {
+            return choice - 1;
+        }
+        else if (choice == numDatasets + 1)
+        {
+            return -1; // Retour au menu précédent
+        }
+        else
+        {
+            printf("\nChoix invalide. Appuyez sur Entrée pour réessayer...");
+            flushInputBuffer();
+            getchar();
+        }
+    }
+}
+
+/**
+ * @brief Exécuter l'algorithme sélectionné sur le dataset choisi
+ * @param algorithmFunc Pointeur de fonction vers l'algorithme à exécuter
+ * @param algorithmName Nom de l'algorithme pour l'affichage
+ */
+void runAlgorithmOnDataset(void (*algorithmFunc)(Graph *), const char *algorithmName)
+{
+    int datasetIndex = showDatasetSelectionMenu();
+    if (datasetIndex == -1)
+    {
+        return; // L'utilisateur a annulé
+    }
+
+    CLEAR_SCREEN();
+    printf("\n╔════════════════════════════════════════════════╗\n");
+    printf("║          EXÉCUTION DE L'ALGORITHME             ║\n");
+    printf("╠════════════════════════════════════════════════╣\n");
+    printf("║ Algorithme: %-33s ║\n", algorithmName);
+    printf("║ Dataset: %-36s ║\n", dataset_names[datasetIndex]);
+    printf("╚════════════════════════════════════════════════╝\n\n");
+
+    printf("Chargement du graphe depuis %s...\n", datasets[datasetIndex]);
+    Graph *graph = loadGraphFromJSON(datasets[datasetIndex]);
+
+    if (!graph)
+    {
+        printf("\nÉchec du chargement du graphe depuis %s\n", datasets[datasetIndex]);
+        printf("\nAppuyez sur Entrée pour revenir au menu principal...");
+        getchar();
+        return;
+    }
+
+    printf("\nGraphe chargé avec succès : %d nœuds et %d arêtes.\n\n", graph->V, countEdges(graph));
+    printf("Exécution de %s en cours...\n", algorithmName);
+
+    // Mesurer les performances
+    long memoryBefore = getMemoryUsage();
     clock_t start = clock();
-    floydWarshall(adjMatrix, graph->V);
+
+    // Exécuter l'algorithme
+    algorithmFunc(graph);
+
+    // Calculer les métriques
     clock_t end = clock();
+    double executionTime = ((double)(end - start)) / CLOCKS_PER_SEC;
+    long memoryAfter = getMemoryUsage();
 
-    printf("Temps d'exécution : %.6f secondes\n", ((double)(end - start)) / CLOCKS_PER_SEC);
+    printf("\n╔════════════════════════════════════════════════╗\n");
+    printf("║              RÉSULTATS D'EXÉCUTION             ║\n");
+    printf("╠════════════════════════════════════════════════╣\n");
+    printf("║ Temps d'exécution : %-26.6f ║\n", executionTime);
+    printf("║ Mémoire utilisée  : %-26ld ║\n", memoryAfter - memoryBefore);
+    printf("╚════════════════════════════════════════════════╝\n\n");
 
-    // Libérer la matrice d'adjacence
-    for (int i = 0; i < graph->V; i++)
-    {
-        free(adjMatrix[i]);
-    }
-    free(adjMatrix);
+    freeGraph(graph);
+
+    printf("Appuyez sur Entrée pour revenir au menu principal...");
+    getchar();
 }
 
-// Fonction pour tester et mesurer TSP
-void testTSP(Graph *graph)
+/**
+ * @brief Générer un rapport complet en comparant tous les algorithmes sur tous les datasets
+ * Cette fonction exécute le programme report généré par rapport.c
+ */
+void generateFullReport()
 {
-    printf("\nTest de TSP :\n");
+    CLEAR_SCREEN();
+    printf("\n╔════════════════════════════════════════════════╗\n");
+    printf("║              GÉNÉRATION DU RAPPORT             ║\n");
+    printf("╚════════════════════════════════════════════════╝\n\n");
 
-    // Vérifier la taille du graphe pour éviter les problèmes de mémoire
-    if (graph->V > MAX_TSP_SIZE)
+    printf("Exécution du programme de rapport...\n\n");
+
+    // Exécuter le programme report via system()
+    int result = system("./report");
+
+    if (result != 0)
     {
-        printf("Le graphe est trop grand pour l'algorithme TSP (contient %d sommets). La taille maximale prise en charge est de %d sommets.\n",
-               graph->V, MAX_TSP_SIZE);
-        printf("Test TSP ignoré pour ce graphe.\n");
-        return;
+        printf("\nÉchec de l'exécution du programme de rapport (code %d).\n", result);
+    }
+    else
+    {
+        printf("\nRapport généré avec succès!\n");
     }
 
-    // Convertir la liste d'adjacence en matrice d'adjacence
-    double **adjMatrix = (double **)malloc(graph->V * sizeof(double *));
-    if (!adjMatrix)
-    {
-        printf("Échec de l'allocation de mémoire pour la matrice d'adjacence.\n");
-        return;
-    }
-
-    for (int i = 0; i < graph->V; i++)
-    {
-        adjMatrix[i] = (double *)malloc(graph->V * sizeof(double));
-        if (!adjMatrix[i])
-        {
-            printf("Échec de l'allocation de mémoire pour la ligne %d de la matrice d'adjacence.\n", i);
-            // Libérer la mémoire précédemment allouée
-            for (int j = 0; j < i; j++)
-            {
-                free(adjMatrix[j]);
-            }
-            free(adjMatrix);
-            return;
-        }
-
-        for (int j = 0; j < graph->V; j++)
-        {
-            adjMatrix[i][j] = (i == j) ? 0 : DBL_MAX; // Initialiser avec 0 pour les boucles, DBL_MAX pour aucune arête directe
-        }
-
-        AdjListNode *current = graph->array[i].head;
-        while (current)
-        {
-            adjMatrix[i][current->dest] = current->attr.distance;
-            current = current->next;
-        }
-    }
-
-    // Convertir la liste d'adjacence en matrice d'adjacence (version entière)
-    int **intAdjMatrix = (int **)malloc(graph->V * sizeof(int *));
-    if (!intAdjMatrix)
-    {
-        printf("Échec de l'allocation de mémoire pour la matrice d'adjacence entière.\n");
-        // Libérer la matrice d'adjacence double
-        for (int i = 0; i < graph->V; i++)
-        {
-            free(adjMatrix[i]);
-        }
-        free(adjMatrix);
-        return;
-    }
-
-    for (int i = 0; i < graph->V; i++)
-    {
-        intAdjMatrix[i] = (int *)malloc(graph->V * sizeof(int));
-        if (!intAdjMatrix[i])
-        {
-            printf("Échec de l'allocation de mémoire pour la ligne %d de la matrice d'adjacence entière.\n", i);
-            // Libérer la mémoire précédemment allouée
-            for (int j = 0; j < i; j++)
-            {
-                free(intAdjMatrix[j]);
-            }
-            free(intAdjMatrix);
-
-            // Libérer la matrice d'adjacence double
-            for (int j = 0; j < graph->V; j++)
-            {
-                free(adjMatrix[j]);
-            }
-            free(adjMatrix);
-            return;
-        }
-
-        for (int j = 0; j < graph->V; j++)
-        {
-            intAdjMatrix[i][j] = (adjMatrix[i][j] == DBL_MAX) ? INT_MAX : (int)adjMatrix[i][j];
-        }
-    }
-
-    // Appeler le solveur TSP
-    solveTSP(intAdjMatrix, graph->V);
-
-    // Libérer la matrice d'adjacence entière
-    for (int i = 0; i < graph->V; i++)
-    {
-        free(intAdjMatrix[i]);
-    }
-    free(intAdjMatrix);
-
-    // Libérer la matrice d'adjacence double
-    for (int i = 0; i < graph->V; i++)
-    {
-        free(adjMatrix[i]);
-    }
-    free(adjMatrix);
+    printf("\nAppuyez sur Entrée pour revenir au menu principal...");
+    getchar();
 }
 
-// Fonction pour comparer les performances des algorithmes
-void compareAlgorithms(Graph *graph)
+/**
+ * @brief Afficher le menu pour sélectionner un algorithme
+ */
+void showAlgorithmSelectionMenu()
 {
-    printf("\nComparaison des algorithmes :\n");
+    // Définir les options d'algorithmes disponibles
+    AlgorithmOption algorithms[] = {
+        {"BFS (Parcours en largeur)", BFSWrapper, "Explore le graphe niveau par niveau"},
+        {"DFS (Parcours en profondeur)", DFSWrapper, "Explore le graphe en descendant aussi loin que possible"},
+        {"Floyd-Warshall", FloydWarshallWrapper, "Calcule les plus courts chemins entre toutes les paires de sommets"},
+        {"Bellman-Ford", BellmanFordWrapper, "Calcule les plus courts chemins à partir d'un sommet source"},
+        {"TSP (Problème du voyageur de commerce)", TSPWrapper, "Trouve le circuit hamiltonien de poids minimum"},
+        {"Algorithme génétique", GeneticAlgorithmWrapper, "Optimise les routes de livraison par approche évolutionnaire"},
+        {"Planification multi-jours", MultiDayPlanningWrapper, "Planifie les livraisons sur plusieurs jours"}};
 
-    long memoryBefore, memoryAfter;
-    double executionTime;
+    int numAlgorithms = sizeof(algorithms) / sizeof(algorithms[0]);
+    int choice;
 
-    // BFS
-    memoryBefore = getMemoryUsage();
-    executionTime = measureExecutionTime(BFSWrapper, graph);
-    memoryAfter = getMemoryUsage();
-    printf("BFS - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+    while (1)
+    {
+        CLEAR_SCREEN();
+        printf("\n\n");
+        printf("╔════════════════════════════════════════════════════════════════════════╗\n");
+        printf("║                     SÉLECTION DE L'ALGORITHME                          ║\n");
+        printf("╠════════════════════════════════════════════════════════════════════════╣\n");
 
-    // DFS
-    memoryBefore = getMemoryUsage();
-    executionTime = measureExecutionTime(DFSWrapper, graph);
-    memoryAfter = getMemoryUsage();
-    printf("DFS - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+        for (int i = 0; i < numAlgorithms; i++)
+        {
+            printf("║ %2d. %-62s ║\n", i + 1, algorithms[i].name);
+            printf("║    ► %-64s ║\n", algorithms[i].description);
+        }
 
-    // Floyd-Warshall
-    memoryBefore = getMemoryUsage();
-    executionTime = measureExecutionTime(FloydWarshallWrapper, graph);
-    memoryAfter = getMemoryUsage();
-    printf("Floyd-Warshall - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+        printf("║ %2d. Revenir au menu principal                                         ║\n", numAlgorithms + 1);
+        printf("╚════════════════════════════════════════════════════════════════════════╝\n\n");
 
-    // Bellman-Ford
-    memoryBefore = getMemoryUsage();
-    executionTime = measureExecutionTime(BellmanFordWrapper, graph);
-    memoryAfter = getMemoryUsage();
-    printf("Bellman-Ford - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+        printf("Entrez votre choix (1-%d): ", numAlgorithms + 1);
+        choice = getValidIntegerInput();
 
-    // TSP
-    memoryBefore = getMemoryUsage();
-    executionTime = measureExecutionTime(TSPWrapper, graph);
-    memoryAfter = getMemoryUsage();
-    printf("TSP - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
-
-    // Genetic Algorithm
-    memoryBefore = getMemoryUsage();
-    executionTime = measureExecutionTime(GeneticAlgorithmWrapper, graph);
-    memoryAfter = getMemoryUsage();
-    printf("Algorithme génétique - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
-
-    // Multi-Day Delivery Planning
-    memoryBefore = getMemoryUsage();
-    executionTime = measureExecutionTime(MultiDayPlanningWrapper, graph);
-    memoryAfter = getMemoryUsage();
-    printf("Planification multi-jours - Temps d'exécution : %.6f secondes, Mémoire utilisée : %ld KB\n", executionTime, memoryAfter - memoryBefore);
+        if (choice >= 1 && choice <= numAlgorithms)
+        {
+            runAlgorithmOnDataset(algorithms[choice - 1].function, algorithms[choice - 1].name);
+        }
+        else if (choice == numAlgorithms + 1)
+        {
+            return; // Retour au menu principal
+        }
+        else
+        {
+            printf("\nChoix invalide. Appuyez sur Entrée pour réessayer...");
+            flushInputBuffer();
+            getchar();
+        }
+    }
 }
 
+/**
+ * @brief Afficher le menu principal
+ */
+void showMainMenu()
+{
+    int choice;
+
+    while (1)
+    {
+        CLEAR_SCREEN();
+        printf("\n\n");
+        printf("╔════════════════════════════════════════════════╗\n");
+        printf("║      SYSTÈME D'ANALYSE D'ALGORITHMES           ║\n");
+        printf("║              DE GRAPHES v1.0                   ║\n");
+        printf("╠════════════════════════════════════════════════╣\n");
+        printf("║                                                ║\n");
+        printf("║  1. Expérimentation et analyse                 ║\n");
+        printf("║  2. Générer un rapport complet                 ║\n");
+        printf("║  3. Quitter                                    ║\n");
+        printf("║                                                ║\n");
+        printf("╚════════════════════════════════════════════════╝\n\n");
+
+        printf("Entrez votre choix (1-3): ");
+        choice = getValidIntegerInput();
+
+        switch (choice)
+        {
+        case 1:
+            showAlgorithmSelectionMenu();
+            break;
+        case 2:
+            generateFullReport();
+            break;
+        case 3:
+            CLEAR_SCREEN();
+            printf("\nMerci d'avoir utilisé le système d'analyse d'algorithmes de graphes!\n\n");
+            return;
+        default:
+            printf("\nChoix invalide. Appuyez sur Entrée pour réessayer...");
+            flushInputBuffer();
+            getchar();
+        }
+    }
+}
+
+// Fonction principale
 int main()
 {
-    const char *datasets[] = {
-        "datasets/small_network_normal.json",
-        "datasets/small_network_peak.json",
-        "datasets/small_network_crisis.json",
-        "datasets/medium_network_normal.json",
-        "datasets/medium_network_peak.json",
-        "datasets/medium_network_crisis.json",
-        "datasets/large_network_normal.json",
-        "datasets/large_network_peak.json",
-        "datasets/large_network_crisis.json"};
+    // Initialiser le générateur de nombres aléatoires
+    srand((unsigned int)time(NULL));
 
-    int numDatasets = sizeof(datasets) / sizeof(datasets[0]);
+    // Éviter que l'entrée ne soit automatiquement passée au menu
+    setbuf(stdout, NULL);
 
-    for (int i = 0; i < numDatasets; i++)
-    {
-        printf("\n==============================\n");
-        printf("Test du dataset : %s\n", datasets[i]);
-        printf("==============================\n");
-
-        Graph *graph = loadGraphFromJSON(datasets[i]);
-        if (!graph)
-        {
-            printf("Échec du chargement du graphe depuis %s\n", datasets[i]);
-            continue;
-        }
-
-        compareAlgorithms(graph);
-
-        freeGraph(graph);
-    }
+    // Afficher le menu principal
+    showMainMenu();
 
     return 0;
 }
